@@ -6,6 +6,7 @@
     <modules>
         <module>taqweme-web</module>
         <module>taqweme-data</module>
+        <module>taqweme-security</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
