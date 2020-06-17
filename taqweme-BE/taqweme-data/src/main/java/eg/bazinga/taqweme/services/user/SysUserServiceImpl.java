@@ -1,14 +1,16 @@
 package eg.bazinga.taqweme.services.user;
 
 import eg.bazinga.taqweme.domains.SysUser;
+import eg.bazinga.taqweme.dtos.SysUserDTO;
+import eg.bazinga.taqweme.exceptions.ResourceCannotCreatedException;
 import eg.bazinga.taqweme.exceptions.ResourceNotFoundException;
 import eg.bazinga.taqweme.repositories.SysUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SysUserServiceImpl implements SysUserService {
@@ -21,13 +23,27 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public SysUser createUser(SysUser user) {
-        return repository.save(user);
+    public SysUser createUser(SysUser user) throws ResourceCannotCreatedException {
+        SysUser sysUser;
+
+        try {
+            sysUser = repository.save(user);
+        } catch (Exception e) {
+            throw new ResourceCannotCreatedException("ERROR: user creation failed!!");
+        }
+
+        return sysUser;
     }
 
     @Override
-    public Set<SysUser> getAllUsers() {
-        return new HashSet<>(repository.findAll(Sort.by(Sort.Order.asc("id"))));
+    public Set<SysUserDTO> getAllUsers() {
+        return repository
+                .findAll()
+                .stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingLong(SysUser::getId))
+                .map(SysUserDTO::new)
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
@@ -39,9 +55,13 @@ public class SysUserServiceImpl implements SysUserService {
     public SysUser updateUser(Long id, SysUser user) throws ResourceNotFoundException {
         SysUser oldUser = getUserById(id);
 
-        oldUser.setFirstName(user.getFirstName());
-        oldUser.setLastName(user.getLastName());
-        oldUser.setEmail(user.getEmail());
+        oldUser.setName(user.getName());
+        oldUser.setUsername(user.getUsername());
+        oldUser.setPassword(user.getPassword());
+        oldUser.setEmailAddress(user.getEmailAddress());
+        oldUser.setPhoneNumber(user.getPhoneNumber());
+        oldUser.setActive(user.getActive());
+        oldUser.setRoles(user.getRoles());
 
         return repository.save(oldUser);
     }

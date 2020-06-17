@@ -1,72 +1,101 @@
 package eg.bazinga.taqweme.domains;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "SYS_USER")
-public class SysUser implements Serializable {
+public class SysUser extends Person implements Serializable {
 
     @Id
     @SequenceGenerator(name = "SYS_USER_SEQ_GENERATOR", sequenceName = "SYS_USER_SEQ", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SYS_USER_SEQ_GENERATOR")
-    private long id;
+    private Long id;
 
-    @NotEmpty(message = "First name is mandatory")
-    @Column(name = "FIRST_NAME", nullable = false)
-    private String firstName;
+    @NotEmpty(message = "Username is mandatory")
+    @Column(name = "USERNAME", nullable = false)
+    private String username;
 
-    @NotEmpty(message = "Last name is mandatory")
-    @Column(name = "LAST_NAME", nullable = false)
-    private String lastName;
+    @NotEmpty(message = "Password is mandatory")
+    @Column(name = "PASSWORD", nullable = false)
+    private String password;
 
-    @Email
-    @NotEmpty(message = "Email is mandatory")
-    @Column(name = "EMAIL", nullable = false)
-    private String email;
+    @JsonIgnoreProperties("sysUserSet")
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "USER_ROLES",
+            joinColumns = @JoinColumn(name = "USER_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ROLE_ID"))
+    private Set<Role> roles;
 
     public SysUser() {
     }
 
-    public SysUser(String firstName, String lastName, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+    @Builder
+    public SysUser(Long id, String createdBy, LocalDateTime createdDate, String modifiedBy, LocalDateTime modifiedDate,
+                   @NotEmpty(message = "Name is mandatory") String name,
+                   @Email @Size(max = 50) @NotEmpty(message = "Email is mandatory") String emailAddress,
+                   String phoneNumber, Boolean active,
+                   @NotEmpty(message = "Username is mandatory") String username,
+                   @NotEmpty(message = "Password is mandatory") String password,
+                   Set<Role> roles) {
+        super(createdBy, createdDate, modifiedBy, modifiedDate, name, emailAddress, phoneNumber, active);
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
     }
 
-    public long getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public String getUsername() {
+        return username;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public String getPassword() {
+        return password;
     }
 
-    public String getLastName() {
-        return lastName;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public Set<Role> getRoles() {
+        if (roles == null) {
+            roles = new HashSet<>();
+        }
+        return roles;
     }
 
-    public String getEmail() {
-        return email;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    // helper methods
+    public void addRole(Role role) {
+        getRoles().add(role);
+        role.getSysUserSet().add(this);
+    }
+
+    public void removeRole(Role role) {
+        getRoles().remove(role);
+        role.getSysUserSet().remove(this);
     }
 
     @Override
@@ -74,7 +103,7 @@ public class SysUser implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SysUser sysUser = (SysUser) o;
-        return getId() == sysUser.getId();
+        return getId().equals(sysUser.getId());
     }
 
     @Override
@@ -84,11 +113,18 @@ public class SysUser implements Serializable {
 
     @Override
     public String toString() {
-        return "SysUser{" +
+        return "SysUserDTO{" +
                 "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
+                ", name='" + this.getName() + '\'' +
+                ", username='" + username + '\'' +
+                ", emailAddress='" + this.getEmailAddress() + '\'' +
+                ", phoneNumber='" + this.getPhoneNumber() + '\'' +
+                ", active=" + this.getActive() +
+                ", roles=" + roles +
+                ", createdBy=" + this.getCreatedBy() +
+                ", createdDate=" + this.getCreatedDate() +
+                ", ModifiedBy=" + this.getModifiedBy() +
+                ", ModifiedDate=" + this.getModifiedDate() +
                 '}';
     }
 }
