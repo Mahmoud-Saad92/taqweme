@@ -12,19 +12,15 @@
     <artifactId>taqweme-web</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>eg.bazinga</groupId>
-            <artifactId>taqweme-data</artifactId>
-            <version>0.0.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>eg.bazinga</groupId>-->
+<!--            <artifactId>taqweme-data</artifactId>-->
+<!--            <version>0.0.1</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>eg.bazinga</groupId>
             <artifactId>taqweme-security</artifactId>
             <version>0.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
