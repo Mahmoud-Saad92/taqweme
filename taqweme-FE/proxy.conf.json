@@ -1,0 +1,10 @@
+{
+  "/taqweme/*": {
+    "target": "http://localhost:8080",
+    "secure": false
+  },
+  "/oauth/token": {
+    "target": "http://localhost:8080/oauth/token",
+    "secure": false
+  }
+}
